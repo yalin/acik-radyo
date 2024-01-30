@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acik Radyo RSS okuyucu</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-2xl mx-auto bg-white p-4 rounded shadow">
+        <h1 class="text-2xl font-bold mb-4">Acik Radyo - Ahsaptan Betona Mecidiyeden Jetona</h1>
+        <ul id="rssList" class="space-y-4">
+
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rssUrl = "https://acikradyo.com.tr/i/rss/Ahsaptan_Betona_Mecidiyeden_Jetona.xml";
+            const rssList = document.getElementById("rssList");
+
+            fetch(rssUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data, "text/xml");
+                    const items = xmlDoc.querySelectorAll("item");
+
+                    items.forEach(item => {
+                        const titleElement = item.querySelector("title");
+                        const descriptionElement = item.querySelector("description");
+                        const enclosureElement = item.querySelector("enclosure");
+                        const pubDateElement = item.querySelector("pubDate");
+
+                        if (titleElement && descriptionElement && enclosureElement && pubDateElement) {
+                            const title = titleElement.textContent;
+                            const description = descriptionElement.textContent;
+                            const enclosureUrl = enclosureElement.getAttribute("url");
+                            const pubDate = new Date(pubDateElement.textContent);
+
+                            const formattedDate = `${pubDate.getDate().toString().padStart(2, '0')}-${(pubDate.getMonth() + 1).toString().padStart(2, '0')}-${pubDate.getFullYear()}`;
+
+                            const li = document.createElement("li");
+                            li.className = "rounded-md bg-gray-200 p-4";
+                            li.innerHTML = `
+                                        <div class="font-bold text-lg mb-2">${title}</div>
+                                        <p class="mb-2">${description}</p>
+                                        <a href="${enclosureUrl}" class="text-blue-500 flex items-center" target="_blank">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                                            Dinle
+                                        </a>
+                                        <p class="text-gray-500">${formattedDate}</p>
+                                    `;
+                            rssList.appendChild(li);
+                        }
+                    });
+
+                })
+                .catch(error => console.error("Error fetching RSS feed:", error));
+        });
+    </script>
+</body>
+
+</html>
